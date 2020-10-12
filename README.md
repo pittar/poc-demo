@@ -6,7 +6,7 @@ Andrew's part of the Proof of Concept Demo.
 
 * [A-03: API for Platform Certificate Monitoring and Email Alerts](#a-03)
 * [A-04: Monitoring and Dashboards](#a-04)
-* [LG-06: ](#lg-06) 
+* [LG-06: Log Aggregation and Management](#lg-06) 
 * [UH-01: Concurrent Modification - Git Feature Branch Workflow](#uh-01)
 * [Demo 10: Platform Certificates](#demo-10)
 * [Demo 11: Active Directory (LDAP) Group and User Management](#demo-11)
@@ -64,7 +64,7 @@ Demo: Seating Manifest
 
 <a name="lg-06"/>
 
-## LG-06. Log Aggregation
+## LG-06. Log Aggregation and Management
 
 OpenShift includes a cluster logging stack based on the popular *EFK* (Elasticsearch, FluentD, Kibana) stack.  This stack is optional, but fully supported.  It is [installed as a "Day 2" operation](https://docs.openshift.com/container-platform/4.5/logging/cluster-logging-deploying.html).
 
@@ -118,6 +118,16 @@ The `curator` schedule determines when the curator runs in order to delete expir
 <a name="uh-01"/>
 
 ## UH-01: Concurrent Modification - Git Feature Branch Workflow
+
+Red Hat Fuse is based on Apache Camel.  As such, integrations are written in Java code or an XML Domain Specific Language (DSL).  
+
+As such, the best way to ensure there is no concurrent modification of integration code is through proper Git workflows, such as the [Feature Branch Workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow) along with policy enforcement with your git repository management system.
+
+With this workflow, each feature (or bug fix) is done in its own branch off of `master`.  There are no commits directly to `master`. This should be enforced through your git repository management system.
+
+Once a developer has completed their task, they will open a *Pull Request* to have their code merged into `master`.  Normally, this would also require another resource to *review* the pull request.
+
+If another developer has since merged their own code into `master` which would cause a conflict, this will be reflected in the pull request.  This conflict will need too be fixed on the branch before it can be merged into master.
 
 <a name="demo-10"/>
 
