@@ -133,10 +133,25 @@ If another developer has since merged their own code into `master` which would c
 
 ## Demo 10: Platform Certificates
 
-Let's Encrypt
+From a platform perspective, it is easy to replace the certificates for the OpenShift API and Router with your own certificates.  This will be demonstrated with Let's Encrypt.
+
+To demonstrate a Kubernetes-native way of updating the platform certificates, we will use a Kubernetes `Secret` and `Job` to generate new certificates and apply them.
+
+The `Job` that will be used can be found [in this GitHub repository](https://github.com/pittar/ocp-letsencrypt-job).
+
+The main workflow here is:
+1. Determine the *wildacard* and *api* OpenShift URLs.
+2. Use the `acme.sh` script to generage new Let's Encrypt certificates.
+3. Createt a `tls secret` in the `openshift-ingress` namespace containing the new certificates.
+4. Patch the `ingresscontroller` to reference the new certificate secret.
+
+Once this is done, the OpenShift Router and API Server will restart and begin using the new certificates.
 
 <a name="demo-11"/>
 
 ## Demo 11: Active Directory (LDAP) Group and User Management
 
-Let's Encrypt
+OpenShift can be configured to use Active Directory/LDAP for authentication.  When Active Directory or LDAP is used, admins also have the ability to sync user and group information to the OpenShift cluster.
+
+For this demo, we will use a cloud-based LDAP (JumpCloud) as our LDAP server.  Active Directory works similarly, but requires some minor changes to the configuration.  For the purpose of this demo, LDAP will suffice.
+
