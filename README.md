@@ -4,11 +4,12 @@ Andrew's part of the Proof of Concept Demo.
 
 ## Table of Contents
 
-* 1: API for Platform Certificate Monitoring and Email Alerts
-* 2: 
-* 3: 
-* 4: 
+* [1: API for Platform Certificate Monitoring and Email Alerts](#one)
+* [2: ](#two) 
+* [3: ](#three)
+* [4: ](#four)
 
+<a name="one"/>
 ## 1: API for Platform Certificate Monitoring and Email Alerts
 
 ### 1.1: Prometheus HTTP API
@@ -46,6 +47,7 @@ Prometheus also includes [Alertmanager]().  This allows you to trigger alerts ba
 
 It is common for cluster administrators to setup Email receivers for alerts.
 
+<a name="two"/>
 ## 2. Log Aggregation
 
 OpenShift includes a cluster logging stack based on the popular *EFK* (Elasticsearch, FluentD, Kibana) stack.  This stack is optional, but fully supported.  It is [installed as a "Day 2" operation](https://docs.openshift.com/container-platform/4.5/logging/cluster-logging-deploying.html).
@@ -92,3 +94,13 @@ spec:
       type: "fluentd"  
       fluentd: {}
 ```
+
+This allows the cluster administrator to configure retention periods, as well as the size of the log storage (200G in this example).
+
+The `curator` schedule determines when the curator runs in order to delete expired logs.
+
+<a name="three"/>
+## 3: Section 3
+
+<a name="four"/>
+## 4: Section 4
