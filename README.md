@@ -116,7 +116,7 @@ You can then reference this email receiver to have alerts sent by email.
 
 ## A-04: Monitoring and Dashboards
 
-Demo: Seating Manifest
+Demo: [Seating Reservations](https://github.com/pittar/seating-manifests)
 
 <a name="lg-06"/>
 
