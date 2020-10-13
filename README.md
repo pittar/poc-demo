@@ -155,3 +155,121 @@ OpenShift can be configured to use Active Directory/LDAP for authentication.  Wh
 
 For this demo, we will use a cloud-based LDAP (JumpCloud) as our LDAP server.  Active Directory works similarly, but requires some minor changes to the configuration.  For the purpose of this demo, LDAP will suffice.
 
+### LDAP / Active Directory Authentication
+
+The configuation resides in an `OAuth` resource.  For example:
+
+```
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - htpasswd:
+      fileData:
+        name: htpasswd-secret
+    mappingMethod: claim
+    name: htpasswd_provider
+    type: HTPasswd
+  - name: ldap
+    challenge: false
+    login: true
+    mappingMethod: claim
+    type: LDAP
+    ldap:
+      attributes:
+        id:
+        - dn
+        email:
+        - mail
+        name:
+        - cn
+        preferredUsername:
+        - uid
+      bindDN: "uid=ldapuser,ou=Users,o=5ee27e58ad19513fdf256a4b,dc=jumpcloud,dc=com"
+      bindPassword:
+        name: ldap-secret
+      ca:
+        name: ca-config-map
+      insecure: false
+      url: "ldaps://ldap.jumpcloud.com/ou=Users,o=5ee27e58ad19513fdf256a4b,dc=jumpcloud,dc=com?uid"
+  tokenConfig:
+    accessTokenMaxAgeSeconds: 86400
+```
+
+This resource describes two valid authentication methods: `HTPasswd` and `LDAP`
+
+With this configuration in place, a user would be able to login with their LDAP (or Active Directory) credentials.
+
+### LDAP / Active Directory Group Sync
+
+Group Sync is accomplished with another command.  For this, you provide the details of the LDAP as well as the LDAP queries to use to fetch user and group information.  The result is then used to create groups in OpenShift and associate the users from the LDAP/AD.
+
+An example Group Sync custom resource might look like this:
+
+```
+kind: LDAPSyncConfig
+apiVersion: v1
+url: ldaps://ldap.jumpcloud.com
+bindDN: uid=ldapadmin,ou=Users,o=5ee27e58ad19513fdf256a4b,dc=jumpcloud,dc=com
+bindPassword: <bind password>
+rfc2307:
+  groupsQuery:
+    baseDN: ou=Users,o=5ee27e58ad19513fdf256a4b,dc=jumpcloud,dc=com
+    derefAliases: never
+    filter: '(|(cn=ocp-*))'
+  groupUIDAttribute: dn
+  groupNameAttributes:
+  - cn
+  groupMembershipAttributes:
+  - member
+  usersQuery:
+    baseDN: ou=Users,o=5ee27e58ad19513fdf256a4b,dc=jumpcloud,dc=com
+    derefAliases: never
+  userUIDAttribute: dn
+  userNameAttributes:
+  - uid
+```
+
+This describes:
+* The LDAP to connect to, as well as bind information.
+* Groups query and filter
+* Users query
+* Attributes to use for UID and user names
+
+To sync user and group information to OpenShift, you then run the following command:
+
+```
+oc adm groups sync --sync-config=groupsync.yaml --confirm
+```
+
+The result is a list of groups that were created.
+
+If you want to see the group membership, you can list the groups:
+
+```
+oc get groups
+```
+
+### Mapping Permissions to Roles
+
+Now that you have users and groups, you will need to give the appropriate rights to each group!
+
+You can make the `ocp-admins` group `cluster-admin` with the following command:
+
+```
+oc adm policy add-cluster-role-to-group cluster-admin ocp-admins
+```
+
+For "support" to be able to "view" all projects (read-only):
+
+```
+oc adm policy add-cluster-role-to-group cluster-reader ocp-support
+```
+
+And to give Developers access to the "Seating" project:
+
+```
+oc adm policy add-role-to-group admin ocp-developers -n seating
+```
