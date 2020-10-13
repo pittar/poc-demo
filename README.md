@@ -56,6 +56,62 @@ Prometheus also includes [Alertmanager]().  This allows you to trigger alerts ba
 
 It is common for cluster administrators to setup Email receivers for alerts.
 
+The default Alertmanager config looks like this:
+
+```
+"global":
+  "resolve_timeout": "5m"
+"inhibit_rules":
+- "equal":
+  - "namespace"
+  - "alertname"
+  "source_match":
+    "severity": "critical"
+  "target_match_re":
+    "severity": "warning|info"
+- "equal":
+  - "namespace"
+  - "alertname"
+  "source_match":
+    "severity": "warning"
+  "target_match_re":
+    "severity": "info"
+"receivers":
+- "name": "Default"
+- "name": "Watchdog"
+- "name": "Critical"
+"route":
+  "group_by":
+  - "namespace"
+  "group_interval": "5m"
+  "group_wait": "30s"
+  "receiver": "Default"
+  "repeat_interval": "12h"
+  "routes":
+  - "match":
+      "alertname": "Watchdog"
+    "receiver": "Watchdog"
+  - "match":
+      "severity": "critical"
+    "receiver": "Critical"
+```
+
+We can add email to the list of "receivers":
+
+```
+receivers:
+- name: email
+  email_configs:
+  - to: $EMAIL_ACCOUNT
+    from: $EMAIL_ACCOUNT
+    smarthost: smtp.example.com:587
+    auth_username: "$EMAIL_ACCOUNT"
+    auth_identity: "$EMAIL_ACCOUNT"
+    auth_password: "$EMAIL_AUTH_TOKEN"
+```
+
+You can then reference this email receiver to have alerts sent by email.
+
 <a name="a-04"/>
 
 ## A-04: Monitoring and Dashboards
